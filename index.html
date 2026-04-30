@@ -191,8 +191,8 @@ body::after {
 /* ─── Board ─── */
 .board {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
   gap: 1px;
   width: 100%;
   max-width: 360px;
@@ -422,7 +422,7 @@ body::after {
 (() => {
   'use strict';
 
-  const SIZE = 6;
+  const SIZE = 5;
   const $ = (id) => document.getElementById(id);
   const boardEl    = $('board');
   const turnStone  = $('turnStone');
