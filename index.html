@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>ANTI — 反五目</title>
+<title>ANTI — 反四目</title>
 <style>
 :root {
   --bg-0: #08080a;
@@ -393,7 +393,7 @@ body::after {
 
   <section class="screen">
     <div class="title-row">
-      <div class="subtitle">5 ならべたら 負け</div>
+      <div class="subtitle">4 ならべたら 負け</div>
     </div>
 
     <div class="turn">
@@ -404,7 +404,7 @@ body::after {
 
     <div class="board" id="board"></div>
 
-    <div class="hint">石を置いて 5 連を 相手に 押しつけろ</div>
+    <div class="hint">石を置いて 4 連を 相手に 押しつけろ</div>
   </section>
 </div>
 
@@ -551,7 +551,7 @@ body::after {
         if (board[nr*SIZE + nc] !== v) break;
         line.unshift(nr*SIZE + nc);
       }
-      if (line.length >= 5) return line;
+      if (line.length >= 4) return line;
     }
     return null;
   };
