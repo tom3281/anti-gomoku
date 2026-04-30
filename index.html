@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ANTI — 反五目</title>
+<style>
+:root {
+  --bg-0: #08080a;
+  --bg-1: #16161a;
+  --bg-2: #2a2a30;
+  --line: #2e2e36;
+  --steel-0: #4a4a52;
+  --steel-1: #8a8a92;
+  --steel-2: #c8c8d0;
+  --blood: #e0142a;
+  --blood-glow: #ff2a3e;
+  --bone: #e8e4d8;
+  --dim: #6a6a72;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
+  background: radial-gradient(ellipse at 50% 30%, #1a1a20 0%, #0a0a0c 60%, #000 100%);
+  color: var(--bone);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  letter-spacing: 0.08em;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg,
+      transparent 0, transparent 2px,
+      rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 3px);
+  z-index: 1;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+  z-index: 1;
+}
+
+#app {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 8px;
+  flex-shrink: 0;
+}
+.brand {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--steel-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--blood);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--blood-glow);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--steel-0);
+  background: rgba(255,255,255,0.02);
+  border-radius: 50%;
+  color: var(--steel-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.icon-btn:active {
+  transform: scale(0.94);
+  background: rgba(255,255,255,0.06);
+}
+
+/* ─── Game ─── */
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px 24px;
+  position: relative;
+}
+
+.title-row {
+  text-align: center;
+  margin-bottom: 14px;
+}
+.subtitle {
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--dim);
+}
+
+/* turn indicator */
+.turn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  height: 44px;
+}
+.turn-label {
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--dim);
+}
+.turn-stone {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--steel-0);
+  transition: all 0.3s;
+}
+.turn-stone.black {
+  background: radial-gradient(circle at 35% 30%, #4a4a52 0%, #1a1a20 55%, #0a0a0c 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.12),
+    0 0 12px rgba(0,0,0,0.6);
+}
+.turn-stone.white {
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #d8d4c8 55%, #a8a498 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.6),
+    0 0 12px rgba(232, 228, 216, 0.4);
+}
+.turn-name {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--bone);
+}
+
+/* ─── Board ─── */
+.board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 1px;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1;
+  background: var(--line);
+  padding: 1px;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px var(--steel-0),
+    0 8px 24px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative;
+}
+
+.cell {
+  position: relative;
+  background: linear-gradient(135deg, #16161a 0%, #14141a 50%, #10101a 100%);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cell:not(.placed):active {
+  background: linear-gradient(135deg, #20202a 0%, #1a1a22 100%);
+}
+@media (hover: hover) {
+  .cell:not(.placed):hover {
+    background: linear-gradient(135deg, #1c1c24 0%, #18181e 100%);
+  }
+}
+
+.stone {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: drop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes drop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.stone.black {
+  background: radial-gradient(circle at 35% 30%, #4a4a52 0%, #1a1a20 55%, #0a0a0c 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.15),
+    inset 0 -2px 4px rgba(0,0,0,0.5),
+    0 2px 6px rgba(0,0,0,0.7);
+}
+.stone.white {
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #d8d4c8 55%, #a8a498 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.7),
+    inset 0 -2px 4px rgba(0,0,0,0.15),
+    0 2px 6px rgba(0,0,0,0.6);
+}
+
+/* last move marker */
+.cell.last .stone::after {
+  content: "";
+  position: absolute;
+  inset: 38%;
+  border-radius: 50%;
+  background: var(--blood);
+  box-shadow: 0 0 6px var(--blood-glow);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.5; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* losing line highlight */
+.cell.losing {
+  animation: cell-flash 0.6s ease-in-out infinite alternate;
+}
+.cell.losing .stone {
+  box-shadow:
+    0 0 18px var(--blood-glow),
+    inset 0 1px 2px rgba(255,255,255,0.4),
+    0 0 0 2px var(--blood);
+}
+@keyframes cell-flash {
+  from { background: linear-gradient(135deg, #2a0a10, #1a0508); }
+  to   { background: linear-gradient(135deg, #4a0a14, #2a0a10); }
+}
+
+/* hint */
+.hint {
+  margin-top: 22px;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--dim);
+  text-align: center;
+}
+
+/* ─── LOSE overlay ─── */
+.lose-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(224,20,42,0.5) 0%, rgba(50,0,0,0.96) 55%, #000 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s;
+  cursor: pointer;
+  padding: 24px;
+}
+.lose-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.lose-label {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.32em;
+  color: var(--blood-glow);
+  text-shadow: 0 0 24px currentColor;
+  margin-bottom: 12px;
+  animation: shake 0.5s;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.lose-color-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.lose-color-stone {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--bone);
+}
+.lose-color-stone.black {
+  background: radial-gradient(circle at 35% 30%, #4a4a52 0%, #1a1a20 55%, #0a0a0c 100%);
+}
+.lose-color-stone.white {
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #d8d4c8 55%, #a8a498 100%);
+}
+.lose-color-name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  color: var(--bone);
+}
+.lose-msg {
+  font-family: -apple-system, BlinkMacSystemFont, "Yu Gothic UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--bone);
+  text-align: center;
+  line-height: 1.1;
+  text-shadow: 0 0 32px rgba(255,255,255,0.4);
+  transform: scale(0.7);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-bottom: 40px;
+}
+.lose-overlay.show .lose-msg { transform: scale(1); }
+.lose-hint {
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--bone);
+  opacity: 0.6;
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+@media (max-height: 700px) {
+  .turn { margin-bottom: 12px; }
+  .board { max-width: 300px; }
+  .hint { margin-top: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="header">
+    <div class="brand">ANTI</div>
+    <button class="icon-btn" id="resetBtn" aria-label="reset">↻</button>
+  </header>
+
+  <section class="screen">
+    <div class="title-row">
+      <div class="subtitle">5 ならべたら 負け</div>
+    </div>
+
+    <div class="turn">
+      <div class="turn-label">TURN</div>
+      <div class="turn-stone" id="turnStone"></div>
+      <div class="turn-name" id="turnName">—</div>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="hint">石を置いて 5 連を 相手に 押しつけろ</div>
+  </section>
+</div>
+
+<div class="lose-overlay" id="loseOverlay">
+  <div class="lose-label">YOU LOSE</div>
+  <div class="lose-color-row">
+    <div class="lose-color-stone" id="loseStone"></div>
+    <div class="lose-color-name" id="loseName">—</div>
+  </div>
+  <div class="lose-msg">飲んで<br>ください</div>
+  <div class="lose-hint">TAP TO RESTART</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const SIZE = 9;
+  const $ = (id) => document.getElementById(id);
+  const boardEl    = $('board');
+  const turnStone  = $('turnStone');
+  const turnName   = $('turnName');
+  const resetBtn   = $('resetBtn');
+  const loseOverlay = $('loseOverlay');
+  const loseStone   = $('loseStone');
+  const loseName    = $('loseName');
+
+  // 0 empty, 1 black, 2 white
+  let cells = [];          // DOM cell elements
+  let board = [];          // state array
+  let turn = 1;
+  let lastIdx = -1;
+  let busy = false;
+
+  // ─── Audio ───
+  let audioCtx = null;
+  const ensureAudio = () => {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { audioCtx = null; }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  };
+
+  const playPlace = () => {
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(360, t);
+    osc.frequency.exponentialRampToValueAtTime(120, t + 0.06);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.14, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.12);
+  };
+
+  const playLose = () => {
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.5, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, t);
+    filter.frequency.exponentialRampToValueAtTime(150, t + 0.3);
+    noise.connect(filter).connect(noiseGain).connect(ctx.destination);
+    noise.start(t);
+
+    const osc = ctx.createOscillator();
+    const og = ctx.createGain();
+    osc.frequency.setValueAtTime(110, t);
+    osc.frequency.exponentialRampToValueAtTime(28, t + 0.25);
+    og.gain.setValueAtTime(0.45, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    osc.connect(og).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.3);
+  };
+
+  const vibrate = (p) => { if (navigator.vibrate) try { navigator.vibrate(p); } catch(e) {} };
+
+  // ─── Build ───
+  const buildBoard = () => {
+    boardEl.innerHTML = '';
+    cells = [];
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.i = i;
+      cell.addEventListener('click', () => onCellTap(i));
+      boardEl.appendChild(cell);
+      cells.push(cell);
+    }
+  };
+
+  const reset = () => {
+    board = new Array(SIZE * SIZE).fill(0);
+    turn = 1;
+    lastIdx = -1;
+    busy = false;
+    cells.forEach(c => {
+      c.classList.remove('placed', 'last', 'losing');
+      c.innerHTML = '';
+    });
+    updateTurn();
+  };
+
+  const updateTurn = () => {
+    turnStone.classList.remove('black', 'white');
+    if (turn === 1) {
+      turnStone.classList.add('black');
+      turnName.textContent = 'BLACK';
+    } else {
+      turnStone.classList.add('white');
+      turnName.textContent = 'WHITE';
+    }
+  };
+
+  // returns array of indices forming a 5+ line through (r,c) with value v, or null
+  const findLine = (r, c, v) => {
+    const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+    for (const [dr, dc] of dirs) {
+      const line = [r * SIZE + c];
+      for (let k = 1; k < SIZE; k++) {
+        const nr = r + dr*k, nc = c + dc*k;
+        if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) break;
+        if (board[nr*SIZE + nc] !== v) break;
+        line.push(nr*SIZE + nc);
+      }
+      for (let k = 1; k < SIZE; k++) {
+        const nr = r - dr*k, nc = c - dc*k;
+        if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) break;
+        if (board[nr*SIZE + nc] !== v) break;
+        line.unshift(nr*SIZE + nc);
+      }
+      if (line.length >= 5) return line;
+    }
+    return null;
+  };
+
+  const onCellTap = (i) => {
+    if (busy) return;
+    if (board[i] !== 0) return;
+
+    ensureAudio();
+    board[i] = turn;
+    const cell = cells[i];
+    const stone = document.createElement('div');
+    stone.className = 'stone ' + (turn === 1 ? 'black' : 'white');
+    cell.appendChild(stone);
+    cell.classList.add('placed');
+
+    if (lastIdx >= 0) cells[lastIdx].classList.remove('last');
+    cell.classList.add('last');
+    lastIdx = i;
+
+    playPlace();
+    vibrate(15);
+
+    const r = Math.floor(i / SIZE), c = i % SIZE;
+    const line = findLine(r, c, turn);
+    if (line) {
+      busy = true;
+      line.forEach(idx => cells[idx].classList.add('losing'));
+      setTimeout(() => {
+        playLose();
+        vibrate([0, 80, 40, 200]);
+        showLose(turn);
+      }, 500);
+      return;
+    }
+
+    turn = turn === 1 ? 2 : 1;
+    updateTurn();
+  };
+
+  const showLose = (loserColor) => {
+    loseStone.classList.remove('black', 'white');
+    if (loserColor === 1) {
+      loseStone.classList.add('black');
+      loseName.textContent = 'BLACK LOSES';
+    } else {
+      loseStone.classList.add('white');
+      loseName.textContent = 'WHITE LOSES';
+    }
+    loseOverlay.classList.add('show');
+  };
+
+  const dismissLose = () => {
+    if (!loseOverlay.classList.contains('show')) return;
+    loseOverlay.classList.remove('show');
+    reset();
+  };
+
+  // ─── Wire ───
+  resetBtn.addEventListener('click', () => { ensureAudio(); reset(); });
+  loseOverlay.addEventListener('click', dismissLose);
+  document.addEventListener('touchstart', ensureAudio, { once: true, passive: true });
+  document.addEventListener('click', ensureAudio, { once: true });
+
+  buildBoard();
+  reset();
+})();
+</script>
+
+</body>
+</html>
